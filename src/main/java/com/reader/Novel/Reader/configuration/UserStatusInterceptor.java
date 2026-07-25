@@ -19,7 +19,7 @@ public class UserStatusInterceptor implements HandlerInterceptor {
     @Autowired
     private UserService userService;
 
-    @org.springframework.beans.factory.annotation.Value("${yukitales.rememberme.secret}")
+    @org.springframework.beans.factory.annotation.Value("${yukitales.rememberme.secret:YukiTalesSecretRememberMeKey}")
     private String rememberMeSecret;
 
     @Override
