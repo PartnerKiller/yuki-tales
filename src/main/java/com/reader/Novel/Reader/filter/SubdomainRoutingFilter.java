@@ -17,9 +17,14 @@ public class SubdomainRoutingFilter implements Filter {
             String host = httpRequest.getHeader("Host");
             String uri = httpRequest.getRequestURI();
 
-            if (host != null && host.toLowerCase().startsWith("stats.") && uri.equals("/")) {
-                request.getRequestDispatcher("/stats/index.html").forward(request, response);
-                return;
+            if (host != null && host.toLowerCase().startsWith("stats.")) {
+                if (uri.equals("/") || uri.equals("/index.html")) {
+                    request.getRequestDispatcher("/stats/index.html").forward(request, response);
+                    return;
+                } else if (!uri.startsWith("/stats/") && !uri.startsWith("/api/")) {
+                    request.getRequestDispatcher("/stats" + uri).forward(request, response);
+                    return;
+                }
             }
         }
         chain.doFilter(request, response);

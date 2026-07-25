@@ -142,7 +142,11 @@ public class PublicStatsRestController {
             topStories.add(storyMap);
         }
         // Sort top stories by revenue descending
-        topStories.sort((a, b) -> Integer.compare((Integer) b.get("revenueFlakes"), (Integer) a.get("revenueFlakes")));
+        topStories.sort((a, b) -> {
+            int revA = a.get("revenueFlakes") != null ? (Integer) a.get("revenueFlakes") : 0;
+            int revB = b.get("revenueFlakes") != null ? (Integer) b.get("revenueFlakes") : 0;
+            return Integer.compare(revB, revA);
+        });
 
         // Assemble Final JSON Payload
         Map<String, Object> response = new LinkedHashMap<>();

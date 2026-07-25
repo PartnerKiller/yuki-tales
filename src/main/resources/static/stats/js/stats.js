@@ -213,9 +213,9 @@ function renderTopStories(stories = []) {
   }
 
   stories.forEach((story, idx) => {
-    const isComic = 'COMIC'.equalsIgnoreCase(story.type);
+    const isComic = isEqualsIgnoreCase('COMIC', story.type);
     const typeBadge = `<span class="badge-tag ${isComic ? 'badge-comic' : 'badge-novel'}">${story.type || 'NOVEL'}</span>`;
-    const isCompleted = 'COMPLETED'.equalsIgnoreCase(story.status);
+    const isCompleted = isEqualsIgnoreCase('COMPLETED', story.status);
     const statusBadge = `<span class="badge-tag ${isCompleted ? 'badge-completed' : 'badge-ongoing'}">${story.status || 'ONGOING'}</span>`;
     const coverUrl = story.coverUrl || 'https://via.placeholder.com/38x52';
 
@@ -281,7 +281,6 @@ function exportStatsCSV() {
   document.body.removeChild(link);
 }
 
-// Case insensitive helper
-String.prototype.equalsIgnoreCase = function (other) {
-  return typeof other === 'string' && this.toLowerCase() === other.toLowerCase();
-};
+function isEqualsIgnoreCase(str1, str2) {
+  return typeof str1 === 'string' && typeof str2 === 'string' && str1.toLowerCase() === str2.toLowerCase();
+}
