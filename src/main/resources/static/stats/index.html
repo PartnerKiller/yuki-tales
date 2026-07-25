@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yuki Stats - Real-time Analytics & Revenue Portal</title>
+  <meta name="description" content="Real-time statistics dashboard for Yuki Tales platform including revenue, sales, publishing, traffic, and user analytics.">
+  
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/stats.css">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="#" class="brand-logo">
+        <div class="brand-icon">
+          <i class="fa-solid fa-chart-pie"></i>
+        </div>
+        <div>
+          <div class="brand-name">Yuki Analytics</div>
+          <div style="font-size: 0.75rem; color: #94a3b8;">stats.nazuna.dpdns.org</div>
+        </div>
+        <span class="brand-badge">LIVE METRICS</span>
+      </a>
+
+      <div class="header-controls">
+        <div class="live-status">
+          <div class="ping-dot"></div>
+          <span id="last-updated">Connecting...</span>
+        </div>
+
+        <button class="btn-action" id="btn-refresh">
+          <i class="fa-solid fa-arrows-rotate"></i> Refresh
+        </button>
+
+        <button class="btn-action" id="btn-export" style="background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.3);">
+          <i class="fa-solid fa-file-csv"></i> Export CSV
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Dashboard Main Layout -->
+  <main class="dashboard-layout">
+
+    <!-- KPI Summary Grid -->
+    <div class="section-title">
+      <i class="fa-solid fa-bolt text-violet"></i> Platform Overview
+    </div>
+
+    <div class="kpi-grid">
+      <!-- Total Revenue -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Total Revenue</span>
+          <div class="kpi-icon-box icon-purple">
+            <i class="fa-solid fa-snowflake"></i>
+          </div>
+        </div>
+        <div class="kpi-value" id="kpi-revenue">0 ❄️</div>
+        <div class="kpi-subtext" id="kpi-usd-est">$0.00 USD Est.</div>
+      </div>
+
+      <!-- Total Sales Unlocks -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Sales Volume</span>
+          <div class="kpi-icon-box icon-cyan">
+            <i class="fa-solid fa-cart-shopping"></i>
+          </div>
+        </div>
+        <div class="kpi-value" id="kpi-sales">0</div>
+        <div class="kpi-subtext">Unlocked Chapter Transactions</div>
+      </div>
+
+      <!-- Published Stories -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Published Series</span>
+          <div class="kpi-icon-box icon-emerald">
+            <i class="fa-solid fa-book-open"></i>
+          </div>
+        </div>
+        <div class="kpi-value" id="kpi-stories">0</div>
+        <div class="kpi-subtext">Novels & Vertical Comics</div>
+      </div>
+
+      <!-- Total Chapters -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Total Chapters</span>
+          <div class="kpi-icon-box icon-amber">
+            <i class="fa-solid fa-layer-group"></i>
+          </div>
+        </div>
+        <div class="kpi-value" id="kpi-chapters">0</div>
+        <div class="kpi-subtext">Published Reader Chapters</div>
+      </div>
+
+      <!-- Registered Readers -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Registered Users</span>
+          <div class="kpi-icon-box icon-cyan">
+            <i class="fa-solid fa-users"></i>
+          </div>
+        </div>
+        <div class="kpi-value" id="kpi-users">0</div>
+        <div class="kpi-subtext">Platform Readers & Authors</div>
+      </div>
+
+      <!-- Live Online Users -->
+      <div class="kpi-card" style="border-color: rgba(16, 185, 129, 0.3);">
+        <div class="kpi-header">
+          <span class="kpi-label">Live Active Traffic</span>
+          <div class="kpi-icon-box icon-emerald">
+            <i class="fa-solid fa-signal"></i>
+          </div>
+        </div>
+        <div class="kpi-value" style="color: #10b981;" id="kpi-online">1</div>
+        <div class="kpi-subtext">Current Active Connections</div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="section-title">
+      <i class="fa-solid fa-chart-line text-cyan"></i> Analytics & Velocity
+    </div>
+
+    <div class="charts-grid">
+      <!-- Revenue & Sales Trend -->
+      <div class="chart-card" style="grid-column: span 2;">
+        <div class="chart-header">
+          <div class="chart-title">
+            <i class="fa-solid fa-chart-area text-purple me-2"></i> Revenue & Sales Velocity
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-revenue"></canvas>
+        </div>
+      </div>
+
+      <!-- Format Breakdown -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">
+            <i class="fa-solid fa-pie-chart text-cyan me-2"></i> Content Format Share
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-format"></canvas>
+        </div>
+      </div>
+
+      <!-- Reader Signup Trends -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">
+            <i class="fa-solid fa-user-plus text-emerald me-2"></i> Reader Signups Trend
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-publishing"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Series Ranking Table -->
+    <div class="section-title">
+      <i class="fa-solid fa-crown text-amber"></i> Top Series Performance Ranking
+    </div>
+
+    <div class="table-card">
+      <div class="table-wrapper">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Series Title</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Chapters</th>
+              <th>Revenue Earnings</th>
+            </tr>
+          </thead>
+          <tbody id="top-stories-body">
+            <tr>
+              <td colspan="6" style="text-align: center; color: #94a3b8; padding: 24px;">
+                <i class="fa-solid fa-spinner fa-spin me-2"></i> Loading performance statistics...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- App Footer -->
+  <footer class="app-footer">
+    <div>Yuki Analytics Portal &bull; stats.nazuna.dpdns.org &bull; Connected to Yuki Tales Engine</div>
+  </footer>
+
+  <!-- Script logic -->
+  <script src="js/stats.js"></script>
+</body>
+</html>
