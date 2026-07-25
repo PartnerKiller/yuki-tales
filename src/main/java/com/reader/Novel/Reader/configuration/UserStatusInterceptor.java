@@ -19,6 +19,9 @@ public class UserStatusInterceptor implements HandlerInterceptor {
     @Autowired
     private UserService userService;
 
+    @org.springframework.beans.factory.annotation.Value("${yukitales.rememberme.secret}")
+    private String rememberMeSecret;
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         HttpSession session = request.getSession(true);
@@ -38,7 +41,7 @@ public class UserStatusInterceptor implements HandlerInterceptor {
                                 
                                 User dbUser = userService.getUserById(userId);
                                 if (dbUser != null && !Boolean.TRUE.equals(dbUser.getBanned())) {
-                                    String expectedData = dbUser.getId() + ":" + dbUser.getPassword() + ":YukiTalesSecretRememberMeKey";
+                                    String expectedData = dbUser.getId() + ":" + dbUser.getPassword() + ":" + rememberMeSecret;
                                     java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
                                     byte[] hash = digest.digest(expectedData.getBytes(java.nio.charset.StandardCharsets.UTF_8));
                                     StringBuilder hexString = new StringBuilder();
