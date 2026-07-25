@@ -70,8 +70,12 @@ public class StatsPageController {
     }
 
     @GetMapping("/stats/logout")
-    public String statsLogout(HttpSession session) {
+    public String statsLogout(HttpSession session, jakarta.servlet.http.HttpServletResponse response) {
         session.invalidate();
+        jakarta.servlet.http.Cookie rmCookie = new jakarta.servlet.http.Cookie("remember_me", "");
+        rmCookie.setMaxAge(0);
+        rmCookie.setPath("/");
+        response.addCookie(rmCookie);
         return "redirect:/stats/";
     }
 }
