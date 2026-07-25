@@ -9,6 +9,7 @@ let rawStatsData = null;
 let isSyncing = false;
 
 document.addEventListener('DOMContentLoaded', () => {
+  updateDomainDisplay();
   fetchDashboardStats();
 
   const refreshBtn = document.getElementById('btn-refresh');
@@ -34,6 +35,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // Auto-poll live stats data every 5 seconds (5000ms) with cache-busting
   setInterval(fetchDashboardStats, 5000);
 });
+
+function updateDomainDisplay() {
+  const currentHost = window.location.host + (window.location.pathname !== '/' ? window.location.pathname : '');
+  const headerDomain = document.getElementById('header-domain-text');
+  const footerDomain = document.getElementById('footer-domain-text');
+
+  if (headerDomain) headerDomain.textContent = currentHost;
+  if (footerDomain) footerDomain.textContent = currentHost;
+}
 
 function updateLiveClock() {
   const updatedElem = document.getElementById('last-updated');
