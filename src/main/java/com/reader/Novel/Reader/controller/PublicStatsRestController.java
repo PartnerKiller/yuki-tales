@@ -6,7 +6,6 @@ import com.reader.Novel.Reader.model.Purchase;
 import com.reader.Novel.Reader.model.User;
 import com.reader.Novel.Reader.service.NovelService;
 import com.reader.Novel.Reader.service.UserService;
-import com.reader.Novel.Reader.listener.ActiveSessionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -104,7 +103,17 @@ public class PublicStatsRestController {
 
         // 3. User & Audience Metrics
         int totalUsers = allUsers.size();
-        int activeOnlineUsers = ActiveSessionListener.getActiveSessionsCount();
+        int activeOnlineUsers = 1;
+        try {
+            Class<?> listenerClass = Class.forName("com.reader.Novel.Reader.listener.ActiveSessionListener");
+            java.lang.reflect.Method method = listenerClass.getMethod("getActiveSessionsCount");
+            Object val = method.invoke(null);
+            if (val instanceof Integer) {
+                activeOnlineUsers = (Integer) val;
+            }
+        } catch (Exception ignored) {
+            // ActiveSessionListener is omitted from public git builds
+        }
         Map<String, Integer> dailyRegistrationsMap = new TreeMap<>();
         int authorsCount = 0;
         int readersCount = 0;
