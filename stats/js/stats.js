@@ -6,6 +6,7 @@ let revenueChartInstance = null;
 let formatChartInstance = null;
 let publishingChartInstance = null;
 let rawStatsData = null;
+let isSyncing = false;
 
 document.addEventListener('DOMContentLoaded', () => {
   fetchDashboardStats();
@@ -26,11 +27,23 @@ document.addEventListener('DOMContentLoaded', () => {
     exportBtn.addEventListener('click', exportStatsCSV);
   }
 
-  // Auto-poll live stats every 5 seconds (5000ms) with cache-busting
+  // Live clock updating every 1 second (1000ms)
+  setInterval(updateLiveClock, 1000);
+  updateLiveClock();
+
+  // Auto-poll live stats data every 5 seconds (5000ms) with cache-busting
   setInterval(fetchDashboardStats, 5000);
 });
 
+function updateLiveClock() {
+  const updatedElem = document.getElementById('last-updated');
+  if (updatedElem && !isSyncing) {
+    updatedElem.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+  }
+}
+
 async function fetchDashboardStats() {
+  isSyncing = true;
   try {
     const response = await fetch(`${API_BASE_URL}/api/public/stats?t=${Date.now()}`, {
       cache: 'no-store'
@@ -47,11 +60,10 @@ async function fetchDashboardStats() {
     renderPublishingChart(data.dailyRegistrations);
     renderTopStories(data.stories);
 
-    const updatedElem = document.getElementById('last-updated');
-    if (updatedElem) {
-      updatedElem.textContent = `Updated ${new Date().toLocaleTimeString()}`;
-    }
+    isSyncing = false;
+    updateLiveClock();
   } catch (error) {
+    isSyncing = false;
     console.error('Error loading analytics:', error);
     const updatedElem = document.getElementById('last-updated');
     if (updatedElem) {
