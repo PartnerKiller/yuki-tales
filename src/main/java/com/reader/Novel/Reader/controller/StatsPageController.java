@@ -6,7 +6,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class StatsPageController {
 
-    @GetMapping({"/stats", "/stats/"})
+    @GetMapping("/stats")
+    public String statsRedirect() {
+        return "redirect:/stats/";
+    }
+
+    @GetMapping("/stats/")
     public String statsPage() {
         return "forward:/stats/index.html";
     }
