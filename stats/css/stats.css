@@ -441,8 +441,8 @@ body {
 
 .modal-close {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 24px;
+  right: 24px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-color);
   color: var(--text-muted);
@@ -465,7 +465,7 @@ body {
 }
 
 .modal-header {
-  padding: 32px 32px 24px 32px;
+  padding: 24px 72px 20px 28px;
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
