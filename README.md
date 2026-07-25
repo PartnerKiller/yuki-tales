@@ -4,7 +4,7 @@
 [![Java Version](https://img.shields.io/badge/Java-21-blue.svg)](https://openjdk.org/projects/jdk/21/)
 [![Database](https://img.shields.io/badge/Database-H2-orange.svg)](https://www.h2database.com/)
 
-Yuki Tales is a premium, high-performance web platform designed for hosting, reading, and managing web novels and vertical comics. Built with an optimized Spring Boot backend and a sleek, responsive Thymeleaf & Bootstrap frontend, it delivers an immersive reading experience with customizable layouts, real-time interactions, dynamic themes, and secure premium content unlocking.
+Yuki Tales is a premium, high-performance web platform designed for hosting, reading, and managing web novels and vertical comics. Built with an optimized Spring Boot backend and a sleek, responsive Thymeleaf & Bootstrap frontend, it delivers an immersive reading experience with customizable layouts, real-time interactions, dynamic themes, secure premium content unlocking, and dedicated analytics.
 
 ---
 
@@ -19,6 +19,14 @@ Yuki Tales is a premium, high-performance web platform designed for hosting, rea
 ### 🎨 Customization & UI Themes
 * **Dynamic Theme Engine:** System-wide palette selector allowing readers to switch between themes (**Default Violet**, **Ocean Blue**, **Forest Green**, and **Sakura Pink**).
 * **Responsive Design:** Optimized layout with glassmorphism overlays and CSS micro-animations.
+
+### 📊 Real-Time Analytics & Companion Portal
+* **Dedicated Statistics Dashboard (`/stats/`)**: Dark-mode glassmorphism analytics web application featuring KPI cards, Chart.js trends, ranking tables, and CSV report export.
+* **REST Analytics API (`/api/public/stats`)**: Endpoint exposing platform metrics:
+  * **Revenue & Sales Volume**: Snow Flakes earnings, USD estimates, and daily transaction timelines.
+  * **Content Publishing**: Distribution by format (Light Novels vs Vertical Comics), status, and chapter release activity.
+  * **Audience Metrics**: Live active connections, registered user growth, and reader/author breakdown.
+* **Live Auto-Polling & Subdomain Routing**: Dynamic 5-second polling with HTTP cache-busting, 1-second live clock ticker, and host header routing (`stats.nazuna.dpdns.org`).
 
 ### 🛡️ Enterprise-Grade Security Hardening
 * **Secure Authentication:** Implemented Spring Security filter chains with session-fixation protection.
@@ -56,7 +64,7 @@ Yuki Tales is a premium, high-performance web platform designed for hosting, rea
 * **Backend Framework:** Spring Boot 3.4.5, Spring Security, Spring Data JPA
 * **Database Engine:** H2 Database (File-based storage locally under `./data/bookstore`)
 * **Templates & View Layer:** Thymeleaf HTML5 templates, Bootstrap 5, FontAwesome Icons
-* **Client Logic:** Vanilla Javascript, jQuery, Server-Sent Events (SSE)
+* **Client Logic & Visualizations:** Vanilla Javascript, jQuery, Server-Sent Events (SSE), Chart.js
 * **Build Automation:** Maven 3.9.x (wrapped)
 
 ---
@@ -97,7 +105,8 @@ Yuki Tales is a premium, high-performance web platform designed for hosting, rea
    ```
 
 5. **Access the application:**
-   Navigate to [http://localhost:8080](http://localhost:8080).
+   - Main Platform: [http://localhost:8080](http://localhost:8080)
+   - Statistics Dashboard: [http://localhost:8080/stats/](http://localhost:8080/stats/)
 
 ---
 
