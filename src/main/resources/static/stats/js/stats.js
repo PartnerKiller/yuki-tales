@@ -10,23 +10,31 @@ let rawStatsData = null;
 document.addEventListener('DOMContentLoaded', () => {
   fetchDashboardStats();
 
-  document.getElementById('btn-refresh').addEventListener('click', () => {
-    const icon = document.querySelector('#btn-refresh i');
-    if (icon) icon.classList.add('fa-spin');
-    fetchDashboardStats().finally(() => {
-      if (icon) icon.classList.remove('fa-spin');
+  const refreshBtn = document.getElementById('btn-refresh');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => {
+      const icon = refreshBtn.querySelector('i');
+      if (icon) icon.classList.add('fa-spin');
+      fetchDashboardStats().finally(() => {
+        if (icon) icon.classList.remove('fa-spin');
+      });
     });
-  });
+  }
 
-  document.getElementById('btn-export').addEventListener('click', exportStatsCSV);
+  const exportBtn = document.getElementById('btn-export');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', exportStatsCSV);
+  }
 
-  // Auto-poll live stats every 10 seconds
-  setInterval(fetchDashboardStats, 10000);
+  // Auto-poll live stats every 5 seconds (5000ms) with cache-busting
+  setInterval(fetchDashboardStats, 5000);
 });
 
 async function fetchDashboardStats() {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/public/stats`);
+    const response = await fetch(`${API_BASE_URL}/api/public/stats?t=${Date.now()}`, {
+      cache: 'no-store'
+    });
     if (!response.ok) {
       throw new Error(`API response failed: ${response.status}`);
     }
@@ -39,10 +47,16 @@ async function fetchDashboardStats() {
     renderPublishingChart(data.dailyRegistrations);
     renderTopStories(data.stories);
 
-    document.getElementById('last-updated').textContent = `Updated ${new Date().toLocaleTimeString()}`;
+    const updatedElem = document.getElementById('last-updated');
+    if (updatedElem) {
+      updatedElem.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+    }
   } catch (error) {
     console.error('Error loading analytics:', error);
-    document.getElementById('last-updated').textContent = 'Live Sync Failed (Retrying...)';
+    const updatedElem = document.getElementById('last-updated');
+    if (updatedElem) {
+      updatedElem.textContent = 'Live Sync Failed (Retrying...)';
+    }
   }
 }
 
@@ -50,7 +64,10 @@ function updateKPIs(kpis) {
   if (!kpis) return;
   
   animateCounter('kpi-revenue', kpis.totalRevenueFlakes || 0, ' ❄️');
-  document.getElementById('kpi-usd-est').textContent = `$${kpis.estimatedUsdValue || '0.00'} USD Est.`;
+  const usdElem = document.getElementById('kpi-usd-est');
+  if (usdElem) {
+    usdElem.textContent = `$${kpis.estimatedUsdValue || '0.00'} USD Est.`;
+  }
   
   animateCounter('kpi-sales', kpis.totalSales || 0);
   animateCounter('kpi-stories', kpis.totalStories || 0);
@@ -63,7 +80,12 @@ function animateCounter(elementId, targetValue, suffix = '') {
   const elem = document.getElementById(elementId);
   if (!elem) return;
   const startValue = parseInt(elem.getAttribute('data-value') || '0', 10);
-  const duration = 1000;
+  if (startValue === targetValue) {
+    elem.textContent = targetValue.toLocaleString() + suffix;
+    return;
+  }
+
+  const duration = 800;
   const startTime = performance.now();
 
   function update(currentTime) {
@@ -82,24 +104,32 @@ function animateCounter(elementId, targetValue, suffix = '') {
 
 function renderRevenueChart(dailyRevenue = {}, dailySales = {}) {
   const ctx = document.getElementById('chart-revenue');
-  if (!ctx) return;
+  if (!ctx || typeof Chart === 'undefined') return;
 
   const dates = Object.keys(dailyRevenue);
   const revenueValues = dates.map(d => dailyRevenue[d] || 0);
   const salesValues = dates.map(d => dailySales[d] || 0);
 
+  const labels = dates.length ? dates : ['Today'];
+  const revData = revenueValues.length ? revenueValues : [0];
+  const salesData = salesValues.length ? salesValues : [0];
+
   if (revenueChartInstance) {
-    revenueChartInstance.destroy();
+    revenueChartInstance.data.labels = labels;
+    revenueChartInstance.data.datasets[0].data = revData;
+    revenueChartInstance.data.datasets[1].data = salesData;
+    revenueChartInstance.update();
+    return;
   }
 
   revenueChartInstance = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: dates.length ? dates : ['No Sales Yet'],
+      labels: labels,
       datasets: [
         {
           label: 'Revenue (Snow Flakes)',
-          data: revenueValues.length ? revenueValues : [0],
+          data: revData,
           borderColor: '#8b5cf6',
           backgroundColor: 'rgba(139, 92, 246, 0.15)',
           fill: true,
@@ -110,7 +140,7 @@ function renderRevenueChart(dailyRevenue = {}, dailySales = {}) {
         },
         {
           label: 'Sales (Unlocks)',
-          data: salesValues.length ? salesValues : [0],
+          data: salesData,
           borderColor: '#06b6d4',
           backgroundColor: 'rgba(6, 182, 212, 0.15)',
           fill: true,
@@ -136,10 +166,14 @@ function renderRevenueChart(dailyRevenue = {}, dailySales = {}) {
 
 function renderFormatChart(kpis = {}) {
   const ctx = document.getElementById('chart-format');
-  if (!ctx) return;
+  if (!ctx || typeof Chart === 'undefined') return;
+
+  const dataValues = [kpis.novelsCount || 0, kpis.comicsCount || 0];
 
   if (formatChartInstance) {
-    formatChartInstance.destroy();
+    formatChartInstance.data.datasets[0].data = dataValues;
+    formatChartInstance.update();
+    return;
   }
 
   formatChartInstance = new Chart(ctx, {
@@ -147,7 +181,7 @@ function renderFormatChart(kpis = {}) {
     data: {
       labels: ['Light Novels', 'Vertical Comics'],
       datasets: [{
-        data: [kpis.novelsCount || 0, kpis.comicsCount || 0],
+        data: dataValues,
         backgroundColor: ['#06b6d4', '#a855f7'],
         borderColor: '#131027',
         borderWidth: 3
@@ -166,22 +200,28 @@ function renderFormatChart(kpis = {}) {
 
 function renderPublishingChart(dailyRegistrations = {}) {
   const ctx = document.getElementById('chart-publishing');
-  if (!ctx) return;
+  if (!ctx || typeof Chart === 'undefined') return;
 
   const dates = Object.keys(dailyRegistrations);
   const regValues = dates.map(d => dailyRegistrations[d] || 0);
 
+  const labels = dates.length ? dates : ['Today'];
+  const dataValues = regValues.length ? regValues : [0];
+
   if (publishingChartInstance) {
-    publishingChartInstance.destroy();
+    publishingChartInstance.data.labels = labels;
+    publishingChartInstance.data.datasets[0].data = dataValues;
+    publishingChartInstance.update();
+    return;
   }
 
   publishingChartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: dates.length ? dates : ['Today'],
+      labels: labels,
       datasets: [{
         label: 'New Reader Signups',
-        data: regValues.length ? regValues : [0],
+        data: dataValues,
         backgroundColor: 'rgba(16, 185, 129, 0.6)',
         borderColor: '#10b981',
         borderWidth: 1,
@@ -206,12 +246,12 @@ function renderTopStories(stories = []) {
   const tbody = document.getElementById('top-stories-body');
   if (!tbody) return;
 
-  tbody.innerHTML = '';
-  if (!stories.length) {
+  if (!stories || !stories.length) {
     tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 24px;">No story metrics available.</td></tr>`;
     return;
   }
 
+  tbody.innerHTML = '';
   stories.forEach((story, idx) => {
     const isComic = isEqualsIgnoreCase('COMIC', story.type);
     const typeBadge = `<span class="badge-tag ${isComic ? 'badge-comic' : 'badge-novel'}">${story.type || 'NOVEL'}</span>`;
@@ -254,7 +294,7 @@ function escapeHtml(str) {
 }
 
 function exportStatsCSV() {
-  if (!rawStatsData) {
+  if (!rawStatsData || !rawStatsData.stories) {
     alert('Analytics data is still loading.');
     return;
   }
