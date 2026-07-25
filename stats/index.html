@@ -216,6 +216,42 @@
     <div>Yuki Analytics Portal &bull; <span id="footer-domain-text">nazuna.dpdns.org/stats/</span> &bull; Connected to Yuki Tales Engine</div>
   </footer>
 
+  <!-- KPI Detail Drill-down Modal -->
+  <div class="modal-overlay" id="kpi-modal">
+    <div class="modal-card">
+      <button class="modal-close" id="modal-close" title="Close details">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div class="modal-header">
+        <div class="modal-title-box">
+          <div class="modal-icon" id="modal-kpi-icon">
+            <i class="fa-solid fa-database"></i>
+          </div>
+          <div>
+            <h2 class="modal-title" id="modal-kpi-title">Metric Details</h2>
+            <p class="modal-subtitle" id="modal-kpi-subtitle">Interactive transaction ledger data logs</p>
+          </div>
+        </div>
+        <div class="modal-search-wrapper">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="modal-search-input" placeholder="Search database logs..." title="Search directory">
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="modal-table-wrapper">
+          <table class="modal-table">
+            <thead id="modal-table-head">
+              <!-- Dynamically built -->
+            </thead>
+            <tbody id="modal-table-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Script logic -->
   <script src="/stats/js/stats.js"></script>
 </body>

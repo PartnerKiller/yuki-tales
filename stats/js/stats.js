@@ -34,7 +34,231 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Auto-poll live stats data every 5 seconds (5000ms) with cache-busting
   setInterval(fetchDashboardStats, 5000);
+
+  // Modal DOM elements and event bindings
+  const modal = document.getElementById('kpi-modal');
+  const modalClose = document.getElementById('modal-close');
+  const searchInput = document.getElementById('modal-search-input');
+
+  if (modalClose) {
+    modalClose.addEventListener('click', closeModal);
+  }
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
+
+  function closeModal() {
+    modal.classList.remove('active');
+    if (searchInput) searchInput.value = '';
+  }
+
+  // Bind click events to the KPI cards
+  const cards = document.querySelectorAll('.kpi-card');
+  const kpiTypes = ['revenue', 'sales', 'stories', 'chapters', 'users', 'online'];
+
+  cards.forEach((card, idx) => {
+    card.addEventListener('click', () => {
+      if (!rawStatsData) {
+        alert('Data is loading, please wait...');
+        return;
+      }
+      openKpiModal(kpiTypes[idx]);
+    });
+  });
+
+  // Search filter keyup
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      filterModalRows(searchInput.value.trim().toLowerCase());
+    });
+  }
 });
+
+let activeModalType = '';
+let activeTableRows = [];
+
+function openKpiModal(type) {
+  const modal = document.getElementById('kpi-modal');
+  const modalTitle = document.getElementById('modal-kpi-title');
+  const modalSubtitle = document.getElementById('modal-kpi-subtitle');
+  const modalIcon = document.getElementById('modal-kpi-icon');
+  const searchInput = document.getElementById('modal-search-input');
+  const tableHead = document.getElementById('modal-table-head');
+  const tableBody = document.getElementById('modal-table-body');
+
+  if (!modal) return;
+
+  activeModalType = type;
+  modal.classList.add('active');
+  if (tableHead) tableHead.innerHTML = '';
+  if (tableBody) tableBody.innerHTML = '';
+  if (searchInput) searchInput.value = '';
+
+  let iconHtml = '';
+  let titleText = '';
+  let subtitleText = '';
+  let headers = [];
+  let rows = [];
+
+  switch (type) {
+    case 'revenue':
+      iconHtml = '<i class="fa-solid fa-snowflake"></i>';
+      titleText = 'Revenue Transactions';
+      subtitleText = 'Recent chapter purchase ledger entries';
+      headers = ['ID', 'Date/Time', 'Purchased Novel', 'Chapter', 'Buyer Username', 'Buyer Email', 'Price (Flakes)'];
+      rows = (rawStatsData.purchasesList || []).map(p => ({
+        searchString: `${p.id} ${p.novelTitle} ${p.chapterNumber} ${p.username} ${p.email}`.toLowerCase(),
+        html: `
+          <td>#${p.id}</td>
+          <td style="font-size: 0.8rem; color: var(--text-muted);">${p.purchasedAt || 'N/A'}</td>
+          <td style="font-weight: 600;">${escapeHtml(p.novelTitle)}</td>
+          <td>Ch. ${p.chapterNumber} - ${escapeHtml(p.chapterTitle)}</td>
+          <td style="font-weight: 500;">${escapeHtml(p.username)}</td>
+          <td style="font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(p.email)}</td>
+          <td style="font-weight: 700; color: var(--accent-purple);">${p.price} ❄️</td>
+        `
+      }));
+      break;
+
+    case 'sales':
+      iconHtml = '<i class="fa-solid fa-cart-shopping"></i>';
+      titleText = 'Sales Volume Ledger';
+      subtitleText = 'Unlocked chapter transaction registry';
+      headers = ['ID', 'Purchase Date', 'Novel Title', 'Chapter', 'Buyer', 'Revenue'];
+      rows = (rawStatsData.purchasesList || []).map(p => ({
+        searchString: `${p.id} ${p.novelTitle} ${p.chapterNumber} ${p.username}`.toLowerCase(),
+        html: `
+          <td>#${p.id}</td>
+          <td style="font-size: 0.8rem; color: var(--text-muted);">${p.purchasedAt || 'N/A'}</td>
+          <td style="font-weight: 600;">${escapeHtml(p.novelTitle)}</td>
+          <td>Ch. ${p.chapterNumber}</td>
+          <td style="font-weight: 500;">${escapeHtml(p.username)}</td>
+          <td style="font-weight: 700; color: var(--accent-cyan);">${p.price} ❄️</td>
+        `
+      }));
+      break;
+
+    case 'stories':
+      iconHtml = '<i class="fa-solid fa-book-open"></i>';
+      titleText = 'Published Series Directory';
+      subtitleText = 'All Light Novels & Vertical Comics on Yuki Tales';
+      headers = ['ID', 'Series Title', 'Format Type', 'Publish Status', 'Rating', 'Chapters count', 'Revenue (Flakes)'];
+      rows = (rawStatsData.stories || []).map(s => ({
+        searchString: `${s.id} ${s.title} ${s.type} ${s.status}`.toLowerCase(),
+        html: `
+          <td>#${s.id}</td>
+          <td style="font-weight: 600;">${escapeHtml(s.title)}</td>
+          <td><span class="badge-tag ${isEqualsIgnoreCase('COMIC', s.type) ? 'badge-comic' : 'badge-novel'}">${s.type || 'NOVEL'}</span></td>
+          <td><span class="badge-tag ${isEqualsIgnoreCase('COMPLETED', s.status) ? 'badge-completed' : 'badge-ongoing'}">${s.status || 'ONGOING'}</span></td>
+          <td style="color: var(--accent-amber); font-weight: 600;">★ ${s.rating || '5.0'}</td>
+          <td style="font-weight: 600;">${s.chaptersCount || 0}</td>
+          <td style="font-weight: 700; color: var(--accent-purple);">${s.revenueFlakes || 0} ❄️</td>
+        `
+      }));
+      break;
+
+    case 'chapters':
+      iconHtml = '<i class="fa-solid fa-layer-group"></i>';
+      titleText = 'Published Chapters Log';
+      subtitleText = 'Catalog of all reader chapters released';
+      headers = ['ID', 'Novel Title', 'Chapter Number', 'Chapter Title', 'Price (Flakes)', 'Release Date'];
+      rows = (rawStatsData.chaptersList || []).map(c => ({
+        searchString: `${c.id} ${c.novelTitle} ${c.chapterNumber} ${c.title}`.toLowerCase(),
+        html: `
+          <td>#${c.id}</td>
+          <td style="font-weight: 600;">${escapeHtml(c.novelTitle)}</td>
+          <td style="font-weight: 600;">Ch. ${c.chapterNumber}</td>
+          <td>${escapeHtml(c.title)}</td>
+          <td style="font-weight: 700; color: var(--accent-amber);">${c.price} ❄️</td>
+          <td style="font-size: 0.8rem; color: var(--text-muted);">${c.publishAt || 'N/A'}</td>
+        `
+      }));
+      break;
+
+    case 'users':
+      iconHtml = '<i class="fa-solid fa-users"></i>';
+      titleText = 'Registered Users Directory';
+      subtitleText = 'Platform members list';
+      headers = ['ID', 'Username', 'Email Address', 'Profile Name', 'Role Type', 'Status'];
+      rows = (rawStatsData.usersList || []).map(u => ({
+        searchString: `${u.id} ${u.username} ${u.email} ${u.name} ${u.userType}`.toLowerCase(),
+        html: `
+          <td>#${u.id}</td>
+          <td style="font-weight: 600;">${escapeHtml(u.username)}</td>
+          <td>${escapeHtml(u.email)}</td>
+          <td>${escapeHtml(u.name || '')}</td>
+          <td><span class="badge-tag" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan);">${u.userType || 'READER'}</span></td>
+          <td>
+            <span class="badge-tag ${u.banned ? 'badge-ongoing' : 'badge-completed'}" style="${u.banned ? 'background: rgba(244, 63, 94, 0.15); color: var(--accent-rose);' : ''}">
+              ${u.banned ? 'Banned' : 'Active'}
+            </span>
+          </td>
+        `
+      }));
+      break;
+
+    case 'online':
+      iconHtml = '<i class="fa-solid fa-signal"></i>';
+      titleText = 'Live Active Connections';
+      subtitleText = 'Real-time online sessions and active users (2min threshold)';
+      headers = ['User ID', 'Username', 'Email Address', 'Name', 'Platform Role'];
+      rows = (rawStatsData.activeUsersList || []).map(u => ({
+        searchString: `${u.id} ${u.username} ${u.email} ${u.name} ${u.userType}`.toLowerCase(),
+        html: `
+          <td>#${u.id}</td>
+          <td style="font-weight: 600;">${escapeHtml(u.username)}</td>
+          <td>${escapeHtml(u.email)}</td>
+          <td>${escapeHtml(u.name || '')}</td>
+          <td><span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald);">${u.userType || 'READER'}</span></td>
+        `
+      }));
+      if (rows.length === 0) {
+        rows.push({
+          searchString: '',
+          html: `<td colspan="5" style="text-align: center; color: var(--text-muted); padding: 16px;">
+            No authenticated administrators or users currently active. Total active sessions (including anonymous readers): ${rawStatsData.kpis.activeOnlineUsers || 1}
+          </td>`
+        });
+      }
+      break;
+  }
+
+  if (modalIcon) modalIcon.innerHTML = iconHtml;
+  if (modalTitle) modalTitle.textContent = titleText;
+  if (modalSubtitle) modalSubtitle.textContent = subtitleText;
+
+  if (tableHead) {
+    const trHead = document.createElement('tr');
+    headers.forEach(h => {
+      const th = document.createElement('th');
+      th.textContent = h;
+      trHead.appendChild(th);
+    });
+    tableHead.appendChild(trHead);
+  }
+
+  if (tableBody) {
+    activeTableRows = rows.map(r => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = r.html;
+      tableBody.appendChild(tr);
+      return { element: tr, searchString: r.searchString };
+    });
+  }
+}
+
+function filterModalRows(query) {
+  if (!query) {
+    activeTableRows.forEach(r => r.element.style.display = '');
+    return;
+  }
+  activeTableRows.forEach(r => {
+    const match = r.searchString.includes(query);
+    r.element.style.display = match ? '' : 'none';
+  });
+}
 
 function updateDomainDisplay() {
   const currentHost = window.location.host + (window.location.pathname !== '/' ? window.location.pathname : '');

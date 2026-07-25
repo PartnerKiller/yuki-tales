@@ -173,6 +173,83 @@ public class PublicStatsRestController {
         kpis.put("activeOnlineUsers", activeOnlineUsers);
         response.put("kpis", kpis);
 
+        // Detailed Lists for Modals
+        List<Map<String, Object>> usersList = new ArrayList<>();
+        for (User u : allUsers) {
+            Map<String, Object> uMap = new LinkedHashMap<>();
+            uMap.put("id", u.getId());
+            uMap.put("username", u.getUsername());
+            uMap.put("email", u.getEmail());
+            uMap.put("name", u.getName());
+            uMap.put("userType", u.getUser_type());
+            uMap.put("banned", u.getBanned());
+            usersList.add(uMap);
+        }
+        response.put("usersList", usersList);
+
+        List<Map<String, Object>> chaptersList = new ArrayList<>();
+        for (Chapter c : allChapters) {
+            Map<String, Object> cMap = new LinkedHashMap<>();
+            cMap.put("id", c.getId());
+            cMap.put("chapterNumber", c.getChapterNumber());
+            cMap.put("title", c.getTitle());
+            cMap.put("price", c.getPrice());
+            cMap.put("publishAt", c.getPublishAt() != null ? c.getPublishAt().toString() : "Immediately");
+            cMap.put("novelTitle", c.getNovel() != null ? c.getNovel().getTitle() : "Unknown");
+            chaptersList.add(cMap);
+        }
+        response.put("chaptersList", chaptersList);
+
+        List<Map<String, Object>> purchasesList = new ArrayList<>();
+        for (Purchase p : allPurchases) {
+            Map<String, Object> pMap = new LinkedHashMap<>();
+            pMap.put("id", p.getId());
+            pMap.put("purchasedAt", p.getPurchasedAt() != null ? p.getPurchasedAt().toString() : "");
+            
+            User buyer = null;
+            for (User u : allUsers) {
+                if (u.getId() != null && u.getId().equals(p.getUserId())) {
+                    buyer = u;
+                    break;
+                }
+            }
+            pMap.put("username", buyer != null ? buyer.getUsername() : "User #" + p.getUserId());
+            pMap.put("email", buyer != null ? buyer.getEmail() : "");
+
+            Chapter chap = chapterMap.get(p.getChapterId());
+            pMap.put("chapterNumber", chap != null ? chap.getChapterNumber() : "Unknown");
+            pMap.put("chapterTitle", chap != null ? chap.getTitle() : "Unknown");
+            pMap.put("price", chap != null ? chap.getPrice() : 0);
+            pMap.put("novelTitle", (chap != null && chap.getNovel() != null) ? chap.getNovel().getTitle() : "Unknown");
+
+            purchasesList.add(pMap);
+        }
+        response.put("purchasesList", purchasesList);
+
+        List<Map<String, Object>> activeUsersPayload = new ArrayList<>();
+        try {
+            Class<?> listenerClass = Class.forName("com.reader.Novel.Reader.listener.ActiveSessionListener");
+            java.lang.reflect.Method method = listenerClass.getMethod("getActiveUsersList");
+            Object val = method.invoke(null);
+            if (val instanceof List) {
+                List<?> rawList = (List<?>) val;
+                for (Object item : rawList) {
+                    if (item instanceof User) {
+                        User u = (User) item;
+                        Map<String, Object> uMap = new LinkedHashMap<>();
+                        uMap.put("id", u.getId());
+                        uMap.put("username", u.getUsername());
+                        uMap.put("email", u.getEmail());
+                        uMap.put("name", u.getName());
+                        uMap.put("userType", u.getUser_type());
+                        activeUsersPayload.add(uMap);
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        response.put("activeUsersList", activeUsersPayload);
+
         // Timelines for Charts
         response.put("dailyRevenue", dailyRevenueMap);
         response.put("dailySales", dailySalesMap);
