@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yuki Stats - Portal Login</title>
+  
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  
+  <link rel="stylesheet" href="/stats/css/stats.css">
+  
+  <style>
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+    }
+    
+    .login-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      padding: 40px;
+      width: 100%;
+      max-width: 440px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      transition: var(--transition-smooth);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.05) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .login-card:hover {
+      border-color: var(--border-glow);
+      box-shadow: 0 20px 45px rgba(168, 85, 247, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    
+    .login-header {
+      text-align: center;
+      margin-bottom: 32px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .login-logo {
+      width: 54px;
+      height: 54px;
+      background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-purple) 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px auto;
+      box-shadow: 0 8px 24px rgba(168, 85, 247, 0.3);
+    }
+    
+    .login-logo i {
+      font-size: 1.5rem;
+      color: #fff;
+    }
+    
+    .login-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+      background: linear-gradient(to right, #fff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .login-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .form-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .input-wrapper {
+      position: relative;
+    }
+    
+    .input-wrapper i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-subtle);
+      font-size: 1rem;
+      transition: var(--transition-smooth);
+    }
+    
+    .form-control {
+      width: 100%;
+      background: rgba(11, 9, 20, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px 16px 12px 42px;
+      color: #fff;
+      font-family: var(--font-family);
+      font-size: 0.92rem;
+      outline: none;
+      transition: var(--transition-smooth);
+    }
+    
+    .form-control:focus {
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 10px rgba(168, 85, 247, 0.2);
+      background: rgba(11, 9, 20, 0.8);
+    }
+    
+    .form-control:focus + i {
+      color: var(--accent-purple);
+    }
+    
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, var(--accent-violet) 0%, var(--accent-purple) 100%);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      font-family: var(--font-family);
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.25);
+      transition: var(--transition-smooth);
+      position: relative;
+      z-index: 1;
+      margin-top: 10px;
+    }
+    
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(139, 92, 246, 0.35);
+      filter: brightness(1.1);
+    }
+    
+    .btn-submit:active {
+      transform: translateY(0);
+    }
+    
+    .alert-error {
+      background: rgba(244, 63, 94, 0.1);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: #f43f5e;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .alert-error i {
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">
+          <i class="fa-solid fa-chart-pie"></i>
+        </div>
+        <h1 class="login-title">Yuki Analytics</h1>
+        <p class="login-subtitle">Sign in to access platform insights</p>
+      </div>
+      
+      <!-- Error Alert -->
+      <div class="alert-error" th:if="${error != null}">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span th:text="${error}">Invalid credentials.</span>
+      </div>
+      
+      <form th:action="@{/stats/login}" method="POST">
+        <div class="form-group">
+          <label class="form-label" for="username">Username or Email</label>
+          <div class="input-wrapper">
+            <input type="text" id="username" name="username" class="form-control" placeholder="Enter administrator email" required autocomplete="username">
+            <i class="fa-solid fa-user"></i>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+            <i class="fa-solid fa-lock"></i>
+          </div>
+        </div>
+        
+        <button type="submit" class="btn-submit">
+          Sign In <i class="fa-solid fa-arrow-right-to-bracket ms-2"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+</body>
+</html>

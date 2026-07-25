@@ -34,7 +34,12 @@ public class PublicStatsRestController {
     private UserService userService;
 
     @GetMapping("/stats")
-    public ResponseEntity<?> getPublicStats() {
+    public ResponseEntity<?> getPublicStats(jakarta.servlet.http.HttpSession session) {
+        User loggedInUser = (User) session.getAttribute("user");
+        if (loggedInUser == null || (!"ADMIN".equals(loggedInUser.getUser_type()) && !"OWNER".equals(loggedInUser.getUser_type()))) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Unauthorized access. Please log in as an administrator or owner."));
+        }
         List<Novel> allNovels = novelService.getAllNovels();
         List<Chapter> allChapters = novelService.getAllChapters();
         List<Purchase> allPurchases = novelService.getAllPurchases();

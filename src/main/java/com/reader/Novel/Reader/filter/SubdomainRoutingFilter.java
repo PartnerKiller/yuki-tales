@@ -19,7 +19,7 @@ public class SubdomainRoutingFilter implements Filter {
 
             if (host != null && host.toLowerCase().startsWith("stats.")) {
                 if (uri.equals("/") || uri.equals("/index.html")) {
-                    request.getRequestDispatcher("/stats/index.html").forward(request, response);
+                    request.getRequestDispatcher("/stats/").forward(request, response);
                     return;
                 } else if (!uri.startsWith("/stats/") && !uri.startsWith("/api/")) {
                     request.getRequestDispatcher("/stats" + uri).forward(request, response);
