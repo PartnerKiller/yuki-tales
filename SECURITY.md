@@ -17,7 +17,7 @@ We take the security of **Yuki Tales** and our users very seriously. If you disc
 
 ### How to Report
 
-- **Email**: Send your findings to [partnerkiller.zerotwo@gmail.com](mailto:partnerkiller.zerotwo@gmail.com)
+- **Email**: Send your findings to [sayan.002.majumder@gmail.com](mailto:sayan.002.majumder@gmail.com)
 - **GitHub Advisory**: Alternatively, create a [Private Vulnerability Advisory](https://github.com/PartnerKiller/yuki-tales/security/advisories/new) directly on GitHub.
 
 ### What to Include
