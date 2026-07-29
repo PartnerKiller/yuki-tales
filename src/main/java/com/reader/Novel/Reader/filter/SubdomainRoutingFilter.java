@@ -21,7 +21,7 @@ public class SubdomainRoutingFilter implements Filter {
                 if (uri.equals("/") || uri.equals("/index.html")) {
                     request.getRequestDispatcher("/stats/").forward(request, response);
                     return;
-                } else if (!uri.startsWith("/stats/") && !uri.startsWith("/api/")) {
+                } else if (!uri.startsWith("/stats/") && !uri.startsWith("/api/") && !uri.startsWith("/favicon")) {
                     request.getRequestDispatcher("/stats" + uri).forward(request, response);
                     return;
                 }
