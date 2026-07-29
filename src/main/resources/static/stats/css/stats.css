@@ -83,6 +83,19 @@ body {
   box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
 }
 
+.brand-logo-img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.35);
+  transition: transform 0.3s ease;
+}
+
+.brand-logo:hover .brand-logo-img {
+  transform: scale(1.08) rotate(5deg);
+}
+
 .brand-name {
   font-size: 1.4rem;
   font-weight: 700;
